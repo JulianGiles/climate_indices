@@ -21,6 +21,7 @@ _KEY_ARRAY = "array"
 _KEY_SHAPE = "shape"
 _KEY_LAT = "lat"
 _KEY_RESULT = "result_array"
+_KEY_FITTING = "fitting_array"
 _KEY_RESULT_SCPDSI = "result_array_scpdsi"
 _KEY_RESULT_PDSI = "result_array_pdsi"
 _KEY_RESULT_PHDI = "result_array_phdi"
@@ -488,6 +489,8 @@ def _build_arguments(keyword_args):
         function_arguments["calibration_year_final"] = \
             keyword_args["calibration_end_year"]
         function_arguments["periodicity"] = keyword_args["periodicity"]
+        function_arguments["save_params"] = keyword_args["save_params"]
+        function_arguments["fitting_params"] = keyword_args["load_params"]
 
     elif keyword_args["index"] == "pnp":
         function_arguments["scale"] = keyword_args["scale"]
@@ -719,6 +722,10 @@ def _compute_write_index(keyword_arguments):
             chunks = {"time": -1}
         else:
             raise ValueError(f"Invalid 'input_type' keyword argument: {input_type}")
+
+    if keyword_arguments["load_params"] != None :
+        files.append(keyword_arguments["load_params"] + "_fitting_params_" + keyword_arguments["index"] + ".nc")
+
     dataset = xr.open_mfdataset(files, chunks=chunks)
 
     # trim out all data variables from the dataset except the ones we'll need
@@ -1005,6 +1012,19 @@ def _compute_write_index(keyword_arguments):
                 _KEY_SHAPE: output_shape,
             }
 
+        if _KEY_FITTING not in _global_shared_arrays:
+            if keyword_arguments['periodicity'].name == 'monthly': pp = 12
+            if keyword_arguments['periodicity'].name == 'daily': pp = 366
+            if keyword_arguments['distribution'].name == 'pearson': nn = 4
+            if keyword_arguments['distribution'].name == 'gamma': pp = 2
+            
+            fp_output_shape = tuple([x for x in output_shape[:-1]]+[nn*pp])
+            _global_shared_arrays[_KEY_FITTING] = {
+                _KEY_ARRAY: multiprocessing.Array("d", int(np.prod(fp_output_shape))), # fitting params are at most 4
+                _KEY_SHAPE: fp_output_shape,
+            }
+
+
         if keyword_arguments["index"] in ["spi", "pnp"]:
 
             # apply the SPI function along the time axis (axis=2)
@@ -1095,7 +1115,41 @@ def _compute_write_index(keyword_arguments):
             keyword_arguments["output_file_base"] + "_" + output_var_name + ".nc"
         dataset.to_netcdf(netcdf_file_name)
 
-        return netcdf_file_name, output_var_name
+
+        # Do the same process to save the fitting parameters if requested
+        if keyword_arguments["save_params"] != None and keyword_arguments["index"] in ["spi", "spei"]:
+        
+            long_name = keyword_arguments["index"].upper()+' fitting params'
+            attrs = {"long_name": long_name}
+            var_name_fp = 'fitting_params'
+            
+            output_dims_fp = tuple([x for x in output_dims[:-1]]+['params'])
+
+            # get the shared memory fitting params array and convert it to a numpy array
+            array = _global_shared_arrays[_KEY_FITTING][_KEY_ARRAY]
+            shape = _global_shared_arrays[_KEY_FITTING][_KEY_SHAPE]
+            fitting_values = np.frombuffer(array.get_obj()).reshape(shape).astype(np.float32)
+
+            # create a new variable to contain the index values, assign into the dataset
+            
+            fitting = xr.Variable(dims=output_dims_fp,
+                                   data=fitting_values,
+                                   attrs=attrs)
+            dataset[var_name_fp] = fitting
+    
+            # TODO set global attributes accordingly for this new dataset
+    
+            # remove all data variables except for the new variable
+            for var_name in dataset.data_vars:
+                if var_name != var_name_fp:
+                    dataset = dataset.drop(var_name)
+                    
+            # write the fitting_params as NetCDF
+            netcdf_fitting_file_name = \
+				keyword_arguments["save_params"] + "_fitting_params_" + keyword_arguments["index"] + ".nc"
+            dataset.to_netcdf(netcdf_fitting_file_name) 
+		
+        return netcdf_file_name, output_var_name, netcdf_fitting_file_name, var_name_fp
 
 
 # ------------------------------------------------------------------------------
@@ -1115,7 +1169,8 @@ def _spi(precips, parameters):
                        data_start_year=parameters["data_start_year"],
                        calibration_year_initial=parameters["calibration_year_initial"],
                        calibration_year_final=parameters["calibration_year_final"],
-                       periodicity=parameters["periodicity"])
+                       periodicity=parameters["periodicity"],
+					   fitting_params=parameters["fitting_params"])
 
 
 # ------------------------------------------------------------------------------
@@ -1128,8 +1183,8 @@ def _spei(precips, pet_mm, parameters):
                         data_start_year=parameters["data_start_year"],
                         calibration_year_initial=parameters["calibration_year_initial"],
                         calibration_year_final=parameters["calibration_year_final"],
-                        periodicity=parameters["periodicity"])
-
+                        periodicity=parameters["periodicity"],
+					    fitting_params=parameters["fitting_params"])
 
 # ------------------------------------------------------------------------------
 def _palmers(precips, pet_mm, awc, parameters):
@@ -1325,9 +1380,11 @@ def _apply_along_axis(params):
     np_array = np.frombuffer(array.get_obj()).reshape(shape)
     sub_array = np_array[start_index:end_index]
     args = params["args"]
+    
+    shape_fp = _global_shared_arrays[_KEY_FITTING][_KEY_SHAPE]
 
     if params["input_type"] == InputType.grid:
-        axis_index = 2
+        axis_index = -1
     elif params["input_type"] == InputType.divisions:
         axis_index = 1
     elif params["input_type"] == InputType.timeseries:
@@ -1339,10 +1396,26 @@ def _apply_along_axis(params):
                                          axis=axis_index,
                                          arr=sub_array,
                                          parameters=args)
+    # ---- extras
+    print(sub_array.shape)
+    print(computed_array.shape)
+    print(computed_array[:,:,:-int(computed_array[0,0,-1]*computed_array[0,0,-2]+2)].shape)
+    print(computed_array[:,:,-int(computed_array[0,0,-1]*computed_array[0,0,-2]+2):].shape)
+    print(shape_fp)
+    # ---- extras
 
+    # save the array with the calculated index
     output_array = _global_shared_arrays[params["output_var_name"]][_KEY_ARRAY]
     np_output_array = np.frombuffer(output_array.get_obj()).reshape(shape)
-    np.copyto(np_output_array[start_index:end_index], computed_array)
+    np.copyto(np_output_array[start_index:end_index], computed_array[:,:,:-int(computed_array[0,0,-1]*computed_array[0,0,-2]+2)])
+    
+    # save the fitting params if requested
+    output_array_fp = _global_shared_arrays[_KEY_FITTING][_KEY_ARRAY]
+    np_output_array_fp = np.frombuffer(output_array_fp.get_obj()).reshape(shape_fp)
+    np.copyto(np_output_array_fp[start_index:end_index], computed_array[:,:,-int(computed_array[0,0,-1]*computed_array[0,0,-2]+2):-2])
+    
+        
+        
 
 
 # ------------------------------------------------------------------------------
@@ -1643,12 +1716,24 @@ def main():  # type: () -> None
         )
         parser.add_argument(
             "--multiprocessing",
-            help="Indices to compute",
+            help="CPUs to use for calculation",
             choices=["single", "all_but_one", "all"],
             required=False,
             default="all_but_one",
         )
-        arguments = parser.parse_args()
+        parser.add_argument(
+            "--save_params",
+            help="Save distribution fitting variables to this file path base (for SPI and SPEI only)",
+            required=False,
+            default=None,
+        )
+        parser.add_argument(
+            "--load_params",
+            help="Load distribution fitting variables from this file path base (for SPI and SPEI only)",
+            required=False,
+            default=None,
+        )
+        arguments = parser.parse_args('--index spi --periodicity monthly --scales 1 6 12 --netcdf_precip /datos/julian.giles/CTL/Data/1980-2012/pre/pre_1982-2012_monsum.nc --var_name_precip var62 --output_file_base /datos/julian.giles/CTL/Data/1980-2012/drought_indices/RCA4_test --calibration_start_year 1982 --calibration_end_year 2012 --save_params RCA4_test'.split()) #TODO borrar lo que esta dentro del parentesis
 
         # validate the arguments and determine the input type
         input_type = _validate_args(arguments)
@@ -1682,7 +1767,10 @@ def main():  # type: () -> None
                              "periodicity": arguments.periodicity,
                              "calibration_start_year": arguments.calibration_start_year,
                              "calibration_end_year": arguments.calibration_end_year,
-                             "output_file_base": arguments.output_file_base}
+                             "output_file_base": arguments.output_file_base,
+							 "save_params": arguments.save_params,
+							 "load_params": arguments.load_params,
+							 }
 
                     # compute and write SPI
                     _compute_write_index(kwrgs)
@@ -1747,7 +1835,9 @@ def main():  # type: () -> None
                         "calibration_start_year": arguments.calibration_start_year,
                         "calibration_end_year": arguments.calibration_end_year,
                         "output_file_base": arguments.output_file_base,
-                    }
+						"save_params": arguments.save_params,
+						"load_params": arguments.load_params,
+						}
 
                     # compute and write SPEI
                     _compute_write_index(kwrgs)

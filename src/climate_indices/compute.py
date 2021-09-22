@@ -532,8 +532,7 @@ def transform_fitted_pearson(
     # fit each value to the Pearson Type III distribution
     values = _pearson_fit(values, probabilities_of_zero, skews, locs, scales)
 
-    return values
-
+    return values, probabilities_of_zero, skews, locs, scales
 
 # ------------------------------------------------------------------------------
 @numba.jit
@@ -742,4 +741,4 @@ def transform_fitted_gamma(
     # a normal distribution are less than or equal to the computed probabilities,
     # as determined by the normal distribution's quantile (or inverse
     # cumulative distribution) function
-    return scipy.stats.norm.ppf(probabilities)
+    return scipy.stats.norm.ppf(probabilities), alphas, betas
