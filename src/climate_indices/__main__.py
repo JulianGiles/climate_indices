@@ -586,9 +586,9 @@ def _drop_data_into_shared_arrays_grid(dataset: xr.Dataset,
 
     # get the data arrays we'll use later in the index computations
     global _global_shared_arrays
-    expected_dims_3d = (("lat", "lon", "time"), ("lon", "lat", "time"))
+    expected_dims_3d = (("lat", "lon", "time"), ("lon", "lat", "time"), ("lon", "lat", "params"))
     expected_dims_2d = (("lat", "lon"), ("lon", "lat"))
-    expected_dims_1d = (("time",),)
+    expected_dims_1d = (("time",),("params",))
     for var_name in var_names:
 
         # confirm that the dimensions of the data array are valid
