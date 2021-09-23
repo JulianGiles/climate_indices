@@ -724,7 +724,7 @@ def _compute_write_index(keyword_arguments):
             raise ValueError(f"Invalid 'input_type' keyword argument: {input_type}")
 
     if keyword_arguments["index"] in ['spi', 'spei'] and keyword_arguments["load_params"] != None :
-        files.append(keyword_arguments["load_params"] + "_fitting_params_" + keyword_arguments["index"] + ".nc")
+        files.append(keyword_arguments["load_params"] + "_fitting_params_" + keyword_arguments['distribution'].name + "_"  + keyword_arguments["index"] + ".nc")
 
     dataset = xr.open_mfdataset(files, chunks=chunks)
 
@@ -736,6 +736,10 @@ def _compute_write_index(keyword_arguments):
         input_var_names.append(keyword_arguments["var_name_temp"])
     if "var_name_pet" in keyword_arguments:
         input_var_names.append(keyword_arguments["var_name_pet"])
+    if keyword_arguments["index"] in ['spi', 'spei'] and keyword_arguments["load_params"] != None :
+        input_var_names.append("fitting_params")
+        
+
     # keep the latitude variable if we're dealing with divisions
     if input_type == InputType.divisions:
         input_var_names.append("lat")
@@ -1389,6 +1393,14 @@ def _apply_along_axis(params):
     sub_array = np_array[start_index:end_index]
     args = params["args"]
     
+    # get the fitting_params if provided
+    if func1d == _spi:
+        if args['fitting_params'] != None:
+            array_fp = _global_shared_arrays['fitting_params'][_KEY_ARRAY]
+            shape_fp = _global_shared_arrays['fitting_params'][_KEY_SHAPE]
+            np_array_fp = np.frombuffer(array_fp.get_obj()).reshape(shape_fp)
+            sub_array_fp = np_array_fp[start_index:end_index]
+    
 
     if params["input_type"] == InputType.grid:
         axis_index = -1
@@ -1411,7 +1423,7 @@ def _apply_along_axis(params):
         np_output_array = np.frombuffer(output_array.get_obj()).reshape(shape)
         np.copyto(np_output_array[start_index:end_index], computed_array[:,:,:-int(computed_array[0,0,-1]*computed_array[0,0,-2]+2)])
         
-        # save the fitting params if requested
+        # save the fitting params 
         output_array_fp = _global_shared_arrays[_KEY_FITTING][_KEY_ARRAY]
         np_output_array_fp = np.frombuffer(output_array_fp.get_obj()).reshape(shape_fp)
         np.copyto(np_output_array_fp[start_index:end_index], computed_array[:,:,-int(computed_array[0,0,-1]*computed_array[0,0,-2]+2):-2])
@@ -1756,7 +1768,7 @@ def main():  # type: () -> None
             default=None,
         )
 
-        arguments = parser.parse_args()
+        arguments = parser.parse_args("--index spi --periodicity monthly --scales 1 6 12 --netcdf_precip /datos/julian.giles/CTL/Data/1980-2012/pre/pre_1982-2012_monsum.nc --var_name_precip var62 --output_file_base /datos/julian.giles/CTL/Data/1980-2012/drought_indeces/prueba/RCA4_test --calibration_start_year 1982 --calibration_end_year 2012 --load_params /datos/julian.giles/CTL/Data/1980-2012/drought_indeces/prueba/RCA4_test")
             
         # validate the arguments and determine the input type
         input_type = _validate_args(arguments)
