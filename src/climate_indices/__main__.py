@@ -1118,37 +1118,38 @@ def _compute_write_index(keyword_arguments):
 
 
         # Do the same process to save the fitting parameters if requested
-        if keyword_arguments["save_params"] != None and keyword_arguments["index"] in ["spi", "spei"]:
+        if keyword_arguments["index"] in ["spi", "spei"]:
+            if keyword_arguments["save_params"] != None:
+                
+                long_name = keyword_arguments["index"].upper()+' fitting params'
+                attrs = {"long_name": long_name}
+                var_name_fp = 'fitting_params'
+                
+                output_dims_fp = tuple([x for x in output_dims[:-1]]+['params'])
+    
+                # get the shared memory fitting params array and convert it to a numpy array
+                array = _global_shared_arrays[_KEY_FITTING][_KEY_ARRAY]
+                shape = _global_shared_arrays[_KEY_FITTING][_KEY_SHAPE]
+                fitting_values = np.frombuffer(array.get_obj()).reshape(shape).astype(np.float32)
+    
+                # create a new variable to contain the index values, assign into the dataset
+                
+                fitting = xr.Variable(dims=output_dims_fp,
+                                       data=fitting_values,
+                                       attrs=attrs)
+                dataset[var_name_fp] = fitting
         
-            long_name = keyword_arguments["index"].upper()+' fitting params'
-            attrs = {"long_name": long_name}
-            var_name_fp = 'fitting_params'
-            
-            output_dims_fp = tuple([x for x in output_dims[:-1]]+['params'])
-
-            # get the shared memory fitting params array and convert it to a numpy array
-            array = _global_shared_arrays[_KEY_FITTING][_KEY_ARRAY]
-            shape = _global_shared_arrays[_KEY_FITTING][_KEY_SHAPE]
-            fitting_values = np.frombuffer(array.get_obj()).reshape(shape).astype(np.float32)
-
-            # create a new variable to contain the index values, assign into the dataset
-            
-            fitting = xr.Variable(dims=output_dims_fp,
-                                   data=fitting_values,
-                                   attrs=attrs)
-            dataset[var_name_fp] = fitting
-    
-            # TODO set global attributes accordingly for this new dataset
-    
-            # remove all data variables except for the new variable
-            for var_name in dataset.data_vars:
-                if var_name != var_name_fp:
-                    dataset = dataset.drop(var_name)
-                    
-            # write the fitting_params as NetCDF
-            netcdf_fitting_file_name = \
-				keyword_arguments["save_params"] + "_fitting_params_" + keyword_arguments['distribution'].name + "_" + keyword_arguments["index"] + ".nc"
-            dataset.to_netcdf(netcdf_fitting_file_name) 
+                # TODO set global attributes accordingly for this new dataset
+        
+                # remove all data variables except for the new variable
+                for var_name in dataset.data_vars:
+                    if var_name != var_name_fp:
+                        dataset = dataset.drop(var_name)
+                        
+                # write the fitting_params as NetCDF
+                netcdf_fitting_file_name = \
+    				keyword_arguments["save_params"] + "_fitting_params_" + keyword_arguments['distribution'].name + "_" + keyword_arguments["index"] + ".nc"
+                dataset.to_netcdf(netcdf_fitting_file_name) 
 		
         return netcdf_file_name, output_var_name, netcdf_fitting_file_name, var_name_fp
 
