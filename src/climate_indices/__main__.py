@@ -1012,7 +1012,8 @@ def _compute_write_index(keyword_arguments):
                 _KEY_SHAPE: output_shape,
             }
 
-        if _KEY_FITTING not in _global_shared_arrays:
+
+        if keyword_arguments['distribution'].name != None:
             if keyword_arguments['periodicity'].name == 'monthly': pp = 12
             if keyword_arguments['periodicity'].name == 'daily': pp = 366
             if keyword_arguments['distribution'].name == 'pearson': nn = 4
@@ -1396,13 +1397,6 @@ def _apply_along_axis(params):
                                          axis=axis_index,
                                          arr=sub_array,
                                          parameters=args)
-    # ---- extras
-    print(sub_array.shape)
-    print(computed_array.shape)
-    print(computed_array[:,:,:-int(computed_array[0,0,-1]*computed_array[0,0,-2]+2)].shape)
-    print(computed_array[:,:,-int(computed_array[0,0,-1]*computed_array[0,0,-2]+2):].shape)
-    print(shape_fp)
-    # ---- extras
 
     # save the array with the calculated index
     output_array = _global_shared_arrays[params["output_var_name"]][_KEY_ARRAY]
