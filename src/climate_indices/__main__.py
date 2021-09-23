@@ -1398,17 +1398,22 @@ def _apply_along_axis(params):
                                          arr=sub_array,
                                          parameters=args)
     #TODO todo esto es valido solo para SPI, para el resto tendría que dejarlo como estaba antes
-    # save the array with the calculated index
-    output_array = _global_shared_arrays[params["output_var_name"]][_KEY_ARRAY]
-    np_output_array = np.frombuffer(output_array.get_obj()).reshape(shape)
-    np.copyto(np_output_array[start_index:end_index], computed_array[:,:,:-int(computed_array[0,0,-1]*computed_array[0,0,-2]+2)])
-    
-    # save the fitting params if requested
-    output_array_fp = _global_shared_arrays[_KEY_FITTING][_KEY_ARRAY]
-    np_output_array_fp = np.frombuffer(output_array_fp.get_obj()).reshape(shape_fp)
-    np.copyto(np_output_array_fp[start_index:end_index], computed_array[:,:,-int(computed_array[0,0,-1]*computed_array[0,0,-2]+2):-2])
-    
+    if func1d == _spi:
+        # save the array with the calculated index
+        output_array = _global_shared_arrays[params["output_var_name"]][_KEY_ARRAY]
+        np_output_array = np.frombuffer(output_array.get_obj()).reshape(shape)
+        np.copyto(np_output_array[start_index:end_index], computed_array[:,:,:-int(computed_array[0,0,-1]*computed_array[0,0,-2]+2)])
         
+        # save the fitting params if requested
+        output_array_fp = _global_shared_arrays[_KEY_FITTING][_KEY_ARRAY]
+        np_output_array_fp = np.frombuffer(output_array_fp.get_obj()).reshape(shape_fp)
+        np.copyto(np_output_array_fp[start_index:end_index], computed_array[:,:,-int(computed_array[0,0,-1]*computed_array[0,0,-2]+2):-2])
+        
+    else:
+        output_array = _global_shared_arrays[params["output_var_name"]][_KEY_ARRAY]
+        np_output_array = np.frombuffer(output_array.get_obj()).reshape(shape)
+        np.copyto(np_output_array[start_index:end_index], computed_array)
+    
         
 
 
