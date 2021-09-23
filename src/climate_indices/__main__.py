@@ -1013,7 +1013,7 @@ def _compute_write_index(keyword_arguments):
             }
 
 
-        if keyword_arguments['distribution'].name != None:
+        if keyword_arguments["index"] in ['spi', 'spei'] and keyword_arguments['distribution'].name != None:
             if keyword_arguments['periodicity'].name == 'monthly': pp = 12
             if keyword_arguments['periodicity'].name == 'daily': pp = 366
             if keyword_arguments['distribution'].name == 'pearson': nn = 4
