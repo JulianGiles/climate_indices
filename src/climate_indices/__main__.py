@@ -723,7 +723,7 @@ def _compute_write_index(keyword_arguments):
         else:
             raise ValueError(f"Invalid 'input_type' keyword argument: {input_type}")
 
-    if keyword_arguments["load_params"] != None :
+    if keyword_arguments["index"] in ['spi', 'spei'] and keyword_arguments["load_params"] != None :
         files.append(keyword_arguments["load_params"] + "_fitting_params_" + keyword_arguments["index"] + ".nc")
 
     dataset = xr.open_mfdataset(files, chunks=chunks)
