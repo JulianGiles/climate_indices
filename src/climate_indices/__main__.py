@@ -1017,7 +1017,7 @@ def _compute_write_index(keyword_arguments):
             if keyword_arguments['periodicity'].name == 'monthly': pp = 12
             if keyword_arguments['periodicity'].name == 'daily': pp = 366
             if keyword_arguments['distribution'].name == 'pearson': nn = 4
-            if keyword_arguments['distribution'].name == 'gamma': pp = 2
+            if keyword_arguments['distribution'].name == 'gamma': nn = 2
             
             fp_output_shape = tuple([x for x in output_shape[:-1]]+[nn*pp])
             _global_shared_arrays[_KEY_FITTING] = {
