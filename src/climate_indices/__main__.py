@@ -1768,7 +1768,7 @@ def main():  # type: () -> None
             default=None,
         )
 
-        arguments = parser.parse_args("--index spi --periodicity monthly --scales 1 6 12 --netcdf_precip /datos/julian.giles/CTL/Data/1980-2012/pre/pre_1982-2012_monsum.nc --var_name_precip var62 --output_file_base /datos/julian.giles/CTL/Data/1980-2012/drought_indeces/prueba/RCA4_test --calibration_start_year 1982 --calibration_end_year 2012 --load_params /datos/julian.giles/CTL/Data/1980-2012/drought_indeces/prueba/RCA4_test")
+        arguments = parser.parse_args()
             
         # validate the arguments and determine the input type
         input_type = _validate_args(arguments)
