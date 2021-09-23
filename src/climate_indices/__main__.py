@@ -1459,15 +1459,31 @@ def _apply_along_axis_double(params):
         start_index:end_index
     ]
 
+    # do the same for the fitting_params array
+    output_array_fp = _global_shared_arrays[_KEY_FITTING][_KEY_ARRAY]
+    shape_fp = _global_shared_arrays[_KEY_FITTING][_KEY_SHAPE]
+    computed_array_fp = np.frombuffer(output_array_fp.get_obj()).reshape(shape_fp)[
+        start_index:end_index
+    ]
+
+
     for i, (x, y) in enumerate(zip(sub_array_1, sub_array_2)):
         if params["input_type"] == InputType.grid:
             for j in range(x.shape[0]):
                 if params["index"] == "pet":
-                    computed_array[i, j] = func1d(x[j], y, parameters=params["args"])
+                    res = func1d(x[j], y, parameters=params["args"])
+                    computed_array[i, j] = res[:-int(res[0,0,-1]*res[0,0,-2]+2)]
+                    computed_array_fp[i, j] = res[-int(res[0,0,-1]*res[0,0,-2]+2):-2]
+                    
                 else:
-                    computed_array[i, j] = func1d(x[j], y[j], parameters=params["args"])
+                    res = func1d(x[j], y[j], parameters=params["args"])
+                    computed_array[i, j] = res[:-int(res[0,0,-1]*res[0,0,-2]+2)]
+                    computed_array_fp[i, j] = res[-int(res[0,0,-1]*res[0,0,-2]+2):-2]
+
         elif params["input_type"] == InputType.divisions:
-            computed_array[i] = func1d(x, y, parameters=params["args"])
+            res = func1d(x, y, parameters=params["args"])
+            computed_array[i] = res[:-int(res[0,0,-1]*res[0,0,-2]+2)]
+            computed_array_fp[i] = res[-int(res[0,0,-1]*res[0,0,-2]+2):-2]
         else:
             raise ValueError(f"Unsupported input type: \'{params['input_type']}\'")
 
@@ -1727,7 +1743,6 @@ def main():  # type: () -> None
             required=False,
             default=None,
         )
-        #arguments = parser.parse_args('--index spi --periodicity monthly --scales 1 6 12 --netcdf_precip /datos/julian.giles/CTL/Data/1980-2012/pre/pre_1982-2012_monsum.nc --var_name_precip var62 --output_file_base /datos/julian.giles/CTL/Data/1980-2012/drought_indices/RCA4_test --calibration_start_year 1982 --calibration_end_year 2012 --save_params RCA4_test'.split()) #TODO borrar lo que esta dentro del parentesis
 
         arguments = parser.parse_args()
             
