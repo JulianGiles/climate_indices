@@ -1382,7 +1382,6 @@ def _apply_along_axis(params):
     sub_array = np_array[start_index:end_index]
     args = params["args"]
     
-    shape_fp = _global_shared_arrays[_KEY_FITTING][_KEY_SHAPE]
 
     if params["input_type"] == InputType.grid:
         axis_index = -1
@@ -1397,8 +1396,9 @@ def _apply_along_axis(params):
                                          axis=axis_index,
                                          arr=sub_array,
                                          parameters=args)
-    #TODO todo esto es valido solo para SPI, para el resto tendría que dejarlo como estaba antes
+
     if func1d == _spi:
+        shape_fp = _global_shared_arrays[_KEY_FITTING][_KEY_SHAPE]
         # save the array with the calculated index
         output_array = _global_shared_arrays[params["output_var_name"]][_KEY_ARRAY]
         np_output_array = np.frombuffer(output_array.get_obj()).reshape(shape)
