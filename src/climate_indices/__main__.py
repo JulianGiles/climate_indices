@@ -1397,7 +1397,7 @@ def _apply_along_axis(params):
                                          axis=axis_index,
                                          arr=sub_array,
                                          parameters=args)
-
+    #TODO todo esto es valido solo para SPI, para el resto tendría que dejarlo como estaba antes
     # save the array with the calculated index
     output_array = _global_shared_arrays[params["output_var_name"]][_KEY_ARRAY]
     np_output_array = np.frombuffer(output_array.get_obj()).reshape(shape)
@@ -1472,18 +1472,18 @@ def _apply_along_axis_double(params):
             for j in range(x.shape[0]):
                 if params["index"] == "pet":
                     res = func1d(x[j], y, parameters=params["args"])
-                    computed_array[i, j] = res[:-int(res[0,0,-1]*res[0,0,-2]+2)]
-                    computed_array_fp[i, j] = res[-int(res[0,0,-1]*res[0,0,-2]+2):-2]
+                    computed_array[i, j] = res[:-int(res[-1]*res[-2]+2)]
+                    computed_array_fp[i, j] = res[-int(res[-1]*res[-2]+2):-2]
                     
                 else:
                     res = func1d(x[j], y[j], parameters=params["args"])
-                    computed_array[i, j] = res[:-int(res[0,0,-1]*res[0,0,-2]+2)]
-                    computed_array_fp[i, j] = res[-int(res[0,0,-1]*res[0,0,-2]+2):-2]
+                    computed_array[i, j] = res[:-int(res[-1]*res[-2]+2)]
+                    computed_array_fp[i, j] = res[-int(res[-1]*res[-2]+2):-2]
 
         elif params["input_type"] == InputType.divisions:
             res = func1d(x, y, parameters=params["args"])
-            computed_array[i] = res[:-int(res[0,0,-1]*res[0,0,-2]+2)]
-            computed_array_fp[i] = res[-int(res[0,0,-1]*res[0,0,-2]+2):-2]
+            computed_array[i] = res[:-int(res[-1]*res[-2]+2)]
+            computed_array_fp[i] = res[-int(res[-1]*res[-2]+2):-2]
         else:
             raise ValueError(f"Unsupported input type: \'{params['input_type']}\'")
 
