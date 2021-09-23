@@ -1151,7 +1151,13 @@ def _compute_write_index(keyword_arguments):
     				keyword_arguments["save_params"] + "_fitting_params_" + keyword_arguments['distribution'].name + "_" + keyword_arguments["index"] + ".nc"
                 dataset.to_netcdf(netcdf_fitting_file_name) 
 		
-        return netcdf_file_name, output_var_name, netcdf_fitting_file_name, var_name_fp
+                return netcdf_file_name, output_var_name, netcdf_fitting_file_name, var_name_fp
+            
+            else:
+                return netcdf_file_name, output_var_name
+
+        else:
+            return netcdf_file_name, output_var_name
 
 
 # ------------------------------------------------------------------------------
