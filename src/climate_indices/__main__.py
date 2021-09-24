@@ -1430,6 +1430,7 @@ def _apply_along_axis(params):
             # concat to the end of sub_array an array of indices to locate the corresponding parameters in _spi
             if axis_index != 0: sub_array = np.concatenate((sub_array, np.arange(len(sub_array.flatten())).reshape(sub_array.shape) ), axis=axis_index )               
             
+    print(sub_array.shape)
     computed_array = np.apply_along_axis(func1d,
                                          axis=axis_index,
                                          arr=sub_array,
