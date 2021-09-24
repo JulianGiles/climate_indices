@@ -1426,6 +1426,9 @@ def _apply_along_axis(params):
                                           'loc': np.moveaxis(sub_array_fp_2[int(params_len/4):int(params_len/4)*2], 0,-1),
                                           'scale': np.moveaxis(sub_array_fp_2[int(params_len/4)*2:int(params_len/4)*3], 0,-1),
                                           'skew': np.moveaxis(sub_array_fp_2[int(params_len/4)*3], 0,-1)}
+                
+                
+                if not args['fitting_params']['prob_zero'].shape == args['fitting_params']['loc'].shape == args['fitting_params']['scale'].shape == args['fitting_params']['skew'].shape: print('ERROR --- fitting_params shapes do not match')
     
     computed_array = np.apply_along_axis(func1d,
                                          axis=axis_index,
