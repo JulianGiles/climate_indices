@@ -1430,7 +1430,7 @@ def _apply_along_axis(params):
     print('sub_array shape: ')
     print(sub_array.shape)
     print('fitting params shape: ')
-    print(args['fitting_params']['loc'])
+    print(args['fitting_params']['loc'].shape)
                 
     computed_array = np.apply_along_axis(func1d,
                                          axis=axis_index,
