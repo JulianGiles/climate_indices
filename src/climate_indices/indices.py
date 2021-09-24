@@ -293,10 +293,10 @@ def spi(
     # clip values to within the valid range, reshape the array back to 1-D
     values = np.clip(values, _FITTED_INDEX_VALID_MIN, _FITTED_INDEX_VALID_MAX).flatten()
 
-    probabilities_of_zero.shape
-    skews.shape
-    locs.shape
-    scales.shape
+    print(probabilities_of_zero.shape)
+    print(skews.shape)
+    print(locs.shape)
+    print(scales.shape)
     
     
     # return the original size array and fitting params
