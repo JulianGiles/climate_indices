@@ -293,13 +293,13 @@ def spi(
     # clip values to within the valid range, reshape the array back to 1-D
     values = np.clip(values, _FITTED_INDEX_VALID_MIN, _FITTED_INDEX_VALID_MAX).flatten()    
     
-    print('got here indices')
     
     # return the original size array and fitting params
     if distribution is Distribution.gamma:
         return np.concatenate((values[0:original_length], alphas, betas, np.array([len(betas), 2]) ))
     elif distribution is Distribution.pearson:
-        return np.concatenate((values[0:original_length], probabilities_of_zero, skews, locs, scales, np.array([len(scales), 4]) ))
+        return values[0:original_length]
+        #return np.concatenate((values[0:original_length], probabilities_of_zero, skews, locs, scales, np.array([len(scales), 4]) ))
 
 
 # ------------------------------------------------------------------------------
