@@ -1392,15 +1392,6 @@ def _apply_along_axis(params):
     np_array = np.frombuffer(array.get_obj()).reshape(shape)
     sub_array = np_array[start_index:end_index]
     args = params["args"]
-    
-    # get the fitting_params if provided
-    if func1d == _spi:
-        if args['fitting_params'] != None:
-            array_fp = _global_shared_arrays['fitting_params'][_KEY_ARRAY]
-            shape_fp = _global_shared_arrays['fitting_params'][_KEY_SHAPE]
-            np_array_fp = np.frombuffer(array_fp.get_obj()).reshape(shape_fp)
-            sub_array_fp = np_array_fp[start_index:end_index]
-    
 
     if params["input_type"] == InputType.grid:
         axis_index = -1
@@ -1410,7 +1401,32 @@ def _apply_along_axis(params):
         axis_index = 0
     else:
         raise ValueError(f"Invalid input type argument: {params['input_type']}")
-
+    
+    # get the fitting_params if provided
+    if func1d == _spi:
+        if args['fitting_params'] != None:
+            array_fp = _global_shared_arrays['fitting_params'][_KEY_ARRAY]
+            shape_fp = _global_shared_arrays['fitting_params'][_KEY_SHAPE]
+            np_array_fp = np.frombuffer(array_fp.get_obj()).reshape(shape_fp)
+            sub_array_fp = np_array_fp[start_index:end_index]
+            params_len = sub_array_fp.shape[-1]
+            
+            if axis_index != 0: # if the array is 2d or 3d shift the params dimension to the front for easier slicing
+                sub_array_fp_2 = np.moveaxis(sub_array_fp, -1, 0)
+            else:
+                sub_array_fp_2 = sub_array_fp
+            
+            if args['distribution'].name == 'gamma':
+                
+                args['fitting_params'] = {'alphas': np.moveaxis(sub_array_fp_2[:int(params_len/2)], 0,-1),
+                                          'betas': np.moveaxis(sub_array_fp_2[int(params_len/2):], 0,-1)}
+                
+            elif args['distribution'].name == 'pearson':
+                args['fitting_params'] = {'probabilities_of_zero': np.moveaxis(sub_array_fp_2[:int(params_len/4)], 0,-1),
+                                          'locs': np.moveaxis(sub_array_fp_2[int(params_len/4):int(params_len/4)*2], 0,-1),
+                                          'scales': np.moveaxis(sub_array_fp_2[int(params_len/4)*2:int(params_len/4)*3], 0,-1),
+                                          'skews': np.moveaxis(sub_array_fp_2[int(params_len/4)*3], 0,-1)}
+    
     computed_array = np.apply_along_axis(func1d,
                                          axis=axis_index,
                                          arr=sub_array,
