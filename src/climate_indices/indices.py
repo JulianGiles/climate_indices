@@ -256,11 +256,12 @@ def spi(
         # get (optional) fitting parameters if provided
         if fitting_params is not None:
             index2d = np.arange(len(fitting_params["prob_zero"].flatten())).reshape(fitting_params["prob_zero"].shape) == index
+            print(index2d)
 
-            probabilities_of_zero = fitting_params["prob_zero"][index2d]
-            locs = fitting_params["loc"][index2d]
-            scales = fitting_params["scale"][index2d]
-            skews = fitting_params["skew"][index2d]
+            probabilities_of_zero = fitting_params["prob_zero"][index2d[0], index2d[1], :]
+            locs = fitting_params["loc"][index2d[0], index2d[1], :]
+            scales = fitting_params["scale"][index2d[0], index2d[1], :]
+            skews = fitting_params["skew"][index2d[0], index2d[1], :]
             
             print('shape of fitting_params orig: ')
             print(fitting_params["scale"].shape)
