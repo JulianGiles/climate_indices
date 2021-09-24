@@ -1422,7 +1422,7 @@ def _apply_along_axis(params):
                                           'betas': np.moveaxis(sub_array_fp_2[int(params_len/2):], 0,-1)}
                 
             elif args['distribution'].name == 'pearson':
-                args['fitting_params'] = {'probabilities_of_zero': np.moveaxis(sub_array_fp_2[:int(params_len/4)], 0,-1),
+                args['fitting_params'] = {'prob_zero': np.moveaxis(sub_array_fp_2[:int(params_len/4)], 0,-1),
                                           'locs': np.moveaxis(sub_array_fp_2[int(params_len/4):int(params_len/4)*2], 0,-1),
                                           'scales': np.moveaxis(sub_array_fp_2[int(params_len/4)*2:int(params_len/4)*3], 0,-1),
                                           'skews': np.moveaxis(sub_array_fp_2[int(params_len/4)*3], 0,-1)}
