@@ -298,7 +298,7 @@ def spi(
     if distribution is Distribution.gamma:
         return np.concatenate((values[0:original_length], alphas, betas, np.array([len(betas), 2]) ))
     elif distribution is Distribution.pearson:
-        return values[0:original_length]
+        return 1
         #return np.concatenate((values[0:original_length], probabilities_of_zero, skews, locs, scales, np.array([len(scales), 4]) ))
 
 
