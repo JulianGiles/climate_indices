@@ -531,7 +531,6 @@ def transform_fitted_pearson(
 
     # fit each value to the Pearson Type III distribution
     values = _pearson_fit(values, probabilities_of_zero, skews, locs, scales)
-    print ('got here correctly')
 
     return values, probabilities_of_zero, skews, locs, scales
 

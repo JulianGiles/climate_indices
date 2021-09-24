@@ -292,6 +292,7 @@ def spi(
 
     # clip values to within the valid range, reshape the array back to 1-D
     values = np.clip(values, _FITTED_INDEX_VALID_MIN, _FITTED_INDEX_VALID_MAX).flatten()
+    print ('got here correctly')
 
     # return the original size array and fitting params
     if distribution is Distribution.gamma:
