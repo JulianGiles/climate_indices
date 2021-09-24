@@ -255,7 +255,7 @@ def spi(
 
         # get (optional) fitting parameters if provided
         if fitting_params is not None:
-            index2d = np.arange(len(fitting_params["prob_zero"].flatten())).reshape(fitting_params["prob_zero"].shape) == index
+            index2d = np.arange(len(fitting_params["prob_zero"].flatten())).reshape(fitting_params["prob_zero"].shape[0:2]) == index
             print(index2d.shape)
 
             probabilities_of_zero = fitting_params["prob_zero"][index2d[0], index2d[1], :]
