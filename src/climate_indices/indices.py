@@ -262,6 +262,8 @@ def spi(
             scales = fitting_params["scale"][index2d]
             skews = fitting_params["skew"][index2d]
             
+            print('shape of fitting_params orig: ')
+            print(fitting_params["scale"].shape)
             print('shape of fitting_params: ')
             print(scales.shape)
             print('len of fitting_params: ')
