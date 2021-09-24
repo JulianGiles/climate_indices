@@ -1426,12 +1426,10 @@ def _apply_along_axis(params):
                                           'loc': np.moveaxis(sub_array_fp_2[int(params_len/4):int(params_len/4)*2], 0,-1),
                                           'scale': np.moveaxis(sub_array_fp_2[int(params_len/4)*2:int(params_len/4)*3], 0,-1),
                                           'skew': np.moveaxis(sub_array_fp_2[int(params_len/4)*3:], 0,-1)}
-    
-    print('sub_array shape: ')
-    print(sub_array.shape)
-    print('fitting params shape: ')
-    print(args['fitting_params']['loc'].shape)
-                
+            
+            # concat to the end of sub_array an array of indices to locate the corresponding parameters in _spi
+            if axis_index != 0: sub_array = np.concatenate((sub_array, np.arange(len(sub_array.flatten())).reshape(sub_array.shape) ), axis=axis_index )               
+            
     computed_array = np.apply_along_axis(func1d,
                                          axis=axis_index,
                                          arr=sub_array,

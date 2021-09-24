@@ -184,13 +184,17 @@ def spi(
     # we expect to operate upon a 1-D array, so if we've been passed a 2-D array
     # then we flatten it, otherwise raise an error
     shape = values.shape
-    if len(shape) == 2:
+    if len(shape) == 2 and fitting_params is None: #do not know how to handle 2-D array with concatenated indexes array
         values = values.flatten()
     elif len(shape) != 1:
         message = "Invalid shape of input array: {shape}".format(shape=shape) + \
                   " -- only 1-D and 2-D arrays are supported"
         _logger.error(message)
         raise ValueError(message)
+    
+    if fitting_params is not None:
+        index = values[-1].copy()
+        values = values[:-1]
 
     # if we're passed all missing values then we can't compute
     # anything, so we return the same array of missing values
@@ -228,8 +232,10 @@ def spi(
 
         # get (optional) fitting parameters if provided
         if fitting_params is not None:
-            alphas = fitting_params["alpha"]
-            betas = fitting_params["beta"]
+            index2d = np.arange(len(fitting_params["alpha"].flatten())).reshape(fitting_params["alpha"].shape) == index
+            
+            alphas = fitting_params["alpha"][index2d]
+            betas = fitting_params["beta"][index2d]
         else:
             alphas = None
             betas = None
@@ -249,10 +255,12 @@ def spi(
 
         # get (optional) fitting parameters if provided
         if fitting_params is not None:
-            probabilities_of_zero = fitting_params["prob_zero"]
-            locs = fitting_params["loc"]
-            scales = fitting_params["scale"]
-            skews = fitting_params["skew"]
+            index2d = np.arange(len(fitting_params["prob_zero"].flatten())).reshape(fitting_params["prob_zero"].shape) == index
+
+            probabilities_of_zero = fitting_params["prob_zero"][index2d]
+            locs = fitting_params["loc"][index2d]
+            scales = fitting_params["scale"][index2d]
+            skews = fitting_params["skew"][index2d]
         else:
             probabilities_of_zero = None
             locs = None
