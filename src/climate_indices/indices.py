@@ -264,6 +264,9 @@ def spi(
             
             print('shape of fitting_params: ')
             print(scales.shape)
+            print('len of fitting_params: ')
+            print(len(scales[0]))
+            
         else:
             probabilities_of_zero = None
             locs = None
