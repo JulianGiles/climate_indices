@@ -1435,6 +1435,8 @@ def _apply_along_axis(params):
                                          arr=sub_array,
                                          parameters=args)
 
+    print( 'got here main')
+
     if func1d == _spi:
         shape_fp = _global_shared_arrays[_KEY_FITTING][_KEY_SHAPE]
         # save the array with the calculated index
