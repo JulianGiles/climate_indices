@@ -1428,7 +1428,10 @@ def _apply_along_axis(params):
                                           'skew': np.moveaxis(sub_array_fp_2[int(params_len/4)*3:], 0,-1)}
             
             # concat to the end of sub_array an array of indices to locate the corresponding parameters in _spi
-            if axis_index != 0: sub_array = np.concatenate((sub_array, np.arange(len(sub_array[:,:,0].flatten())).reshape(sub_array[:,:,0].shape) ), axis=axis_index )               
+            if axis_index != 0: 
+                sub_sub_array = np.moveaxis(sub_array,-1,0)[0]
+                array_of_indices = np.reshape(np.arange(len(sub_sub_array.flatten())).reshape(sub_sub_array.shape),  sub_sub_array.shape+tuple([1]) )
+                sub_array = np.concatenate((sub_array, array_of_indices ), axis=axis_index )               
             
     print(sub_array.shape)
     computed_array = np.apply_along_axis(func1d,
