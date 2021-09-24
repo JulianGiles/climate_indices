@@ -256,23 +256,19 @@ def spi(
         # get (optional) fitting parameters if provided
         if fitting_params is not None:
             index2d = np.argwhere( np.arange(len(fitting_params["prob_zero"][:,:,0].flatten())).reshape(fitting_params["prob_zero"][:,:,0].shape) == index )[0]
-            print(index2d.shape)
 
             probabilities_of_zero = fitting_params["prob_zero"][index2d[0], index2d[1], :]
             locs = fitting_params["loc"][index2d[0], index2d[1], :]
             scales = fitting_params["scale"][index2d[0], index2d[1], :]
             skews = fitting_params["skew"][index2d[0], index2d[1], :]
-            
-            print('shape of fitting_params orig: ')
-            print(fitting_params["scale"].shape)
-            print('shape of fitting_params: ')
-            print(scales.shape)
-            
+                        
         else:
             probabilities_of_zero = None
             locs = None
             scales = None
             skews = None
+            
+        print ('loaded the fitting params correctly')
 
         # fit the scaled values to a Pearson Type III distribution
         # and transform to corresponding normalized sigmas
