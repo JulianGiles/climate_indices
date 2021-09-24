@@ -232,10 +232,10 @@ def spi(
 
         # get (optional) fitting parameters if provided
         if fitting_params is not None:
-            index2d = np.arange(len(fitting_params["alpha"].flatten())).reshape(fitting_params["alpha"].shape) == index
+            index2d = np.argwhere( np.arange(len(fitting_params["alpha"][:,:,0].flatten())).reshape(fitting_params["alpha"][:,:,0].shape) == index )[0]
             
-            alphas = fitting_params["alpha"][index2d]
-            betas = fitting_params["beta"][index2d]
+            alphas = fitting_params["alpha"][index2d[0], index2d[1], :]
+            betas = fitting_params["beta"][index2d[0], index2d[1], :]
         else:
             alphas = None
             betas = None
