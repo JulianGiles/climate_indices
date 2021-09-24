@@ -1434,7 +1434,6 @@ def _apply_along_axis(params):
                                          axis=axis_index,
                                          arr=sub_array,
                                          parameters=args)
-    print ('got here correctly')
 
     if func1d == _spi:
         shape_fp = _global_shared_arrays[_KEY_FITTING][_KEY_SHAPE]
