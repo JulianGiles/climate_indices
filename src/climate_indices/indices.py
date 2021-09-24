@@ -261,6 +261,9 @@ def spi(
             locs = fitting_params["loc"][index2d]
             scales = fitting_params["scale"][index2d]
             skews = fitting_params["skew"][index2d]
+            
+            print('shape of fitting_params: ')
+            print(scales.shape)
         else:
             probabilities_of_zero = None
             locs = None
