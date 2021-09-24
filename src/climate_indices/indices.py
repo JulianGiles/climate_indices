@@ -291,13 +291,9 @@ def spi(
         raise ValueError(message)
 
     # clip values to within the valid range, reshape the array back to 1-D
-    values = np.clip(values, _FITTED_INDEX_VALID_MIN, _FITTED_INDEX_VALID_MAX).flatten()
-
-    print(probabilities_of_zero.shape)
-    print(skews.shape)
-    print(locs.shape)
-    print(scales.shape)
+    values = np.clip(values, _FITTED_INDEX_VALID_MIN, _FITTED_INDEX_VALID_MAX).flatten()    
     
+    print(np.concatenate((values[0:original_length], probabilities_of_zero, skews, locs, scales, np.array([len(scales), 4]) )).shape)
     
     # return the original size array and fitting params
     if distribution is Distribution.gamma:
