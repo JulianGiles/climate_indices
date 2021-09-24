@@ -268,7 +268,6 @@ def spi(
             scales = None
             skews = None
             
-        print ('loaded the fitting params correctly')
 
         # fit the scaled values to a Pearson Type III distribution
         # and transform to corresponding normalized sigmas
