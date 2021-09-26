@@ -1433,7 +1433,6 @@ def _apply_along_axis(params):
                 array_of_indices = np.reshape(np.arange(len(sub_sub_array.flatten())).reshape(sub_sub_array.shape),  sub_sub_array.shape+tuple([1]) )
                 sub_array = np.concatenate((sub_array, array_of_indices ), axis=axis_index )               
             
-    print(sub_array.shape)
     computed_array = np.apply_along_axis(func1d,
                                          axis=axis_index,
                                          arr=sub_array,
@@ -1441,13 +1440,19 @@ def _apply_along_axis(params):
 
 
     if func1d == _spi:
-        shape_fp = _global_shared_arrays[_KEY_FITTING][_KEY_SHAPE]
         # save the array with the calculated index
         output_array = _global_shared_arrays[params["output_var_name"]][_KEY_ARRAY]
+
+        np_output_array = np.frombuffer(output_array.get_obj())
+        print(np_output_array.shape)
+
+
+
         np_output_array = np.frombuffer(output_array.get_obj()).reshape(shape)
         np.copyto(np_output_array[start_index:end_index], computed_array[:,:,:-int(computed_array[0,0,-1]*computed_array[0,0,-2]+2)])
         
         # save the fitting params 
+        shape_fp = _global_shared_arrays[_KEY_FITTING][_KEY_SHAPE]
         output_array_fp = _global_shared_arrays[_KEY_FITTING][_KEY_ARRAY]
         np_output_array_fp = np.frombuffer(output_array_fp.get_obj()).reshape(shape_fp)
         np.copyto(np_output_array_fp[start_index:end_index], computed_array[:,:,-int(computed_array[0,0,-1]*computed_array[0,0,-2]+2):-2])
