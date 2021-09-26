@@ -1438,16 +1438,11 @@ def _apply_along_axis(params):
                                          arr=sub_array,
                                          parameters=args)
 
-
+    print(computed_array.shape)    
+    
     if func1d == _spi:
         # save the array with the calculated index
         output_array = _global_shared_arrays[params["output_var_name"]][_KEY_ARRAY]
-
-        np_output_array = np.frombuffer(output_array.get_obj())
-        print(np_output_array.shape)
-
-
-
         np_output_array = np.frombuffer(output_array.get_obj()).reshape(shape)
         np.copyto(np_output_array[start_index:end_index], computed_array[:,:,:-int(computed_array[0,0,-1]*computed_array[0,0,-2]+2)])
         
