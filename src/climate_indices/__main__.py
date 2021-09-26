@@ -730,14 +730,14 @@ def _compute_write_index(keyword_arguments):
 
     # trim out all data variables from the dataset except the ones we'll need
     input_var_names = []
+    if keyword_arguments["index"] in ['spi', 'spei'] and keyword_arguments["load_params"] != None : 
+        input_var_names.append("fitting_params") #fitting params must go first to avoid passing the wrong output_shape to the results array
     if "var_name_precip" in keyword_arguments:
         input_var_names.append(keyword_arguments["var_name_precip"])
     if "var_name_temp" in keyword_arguments:
         input_var_names.append(keyword_arguments["var_name_temp"])
     if "var_name_pet" in keyword_arguments:
         input_var_names.append(keyword_arguments["var_name_pet"])
-    if keyword_arguments["index"] in ['spi', 'spei'] and keyword_arguments["load_params"] != None :
-        input_var_names.append("fitting_params")
         
 
     # keep the latitude variable if we're dealing with divisions
