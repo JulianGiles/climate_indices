@@ -1423,9 +1423,9 @@ def _apply_along_axis(params):
                 
             elif args['distribution'].name == 'pearson':
                 args['fitting_params'] = {'prob_zero': np.moveaxis(sub_array_fp_2[:int(params_len/4)], 0,-1),
-                                          'loc': np.moveaxis(sub_array_fp_2[int(params_len/4):int(params_len/4)*2], 0,-1),
-                                          'scale': np.moveaxis(sub_array_fp_2[int(params_len/4)*2:int(params_len/4)*3], 0,-1),
-                                          'skew': np.moveaxis(sub_array_fp_2[int(params_len/4)*3:], 0,-1)}
+                                          'skew': np.moveaxis(sub_array_fp_2[int(params_len/4):int(params_len/4)*2], 0,-1),
+                                          'loc': np.moveaxis(sub_array_fp_2[int(params_len/4)*2:int(params_len/4)*3], 0,-1),
+                                          'scale': np.moveaxis(sub_array_fp_2[int(params_len/4)*3:], 0,-1)}
             
             # concat to the end of sub_array an array of indices to locate the corresponding parameters in _spi
             if axis_index != 0: 
@@ -1442,7 +1442,6 @@ def _apply_along_axis(params):
     if func1d == _spi:
         # save the array with the calculated index
         output_array = _global_shared_arrays[params["output_var_name"]][_KEY_ARRAY]
-        print(np.frombuffer(output_array.get_obj()).shape)
         np_output_array = np.frombuffer(output_array.get_obj()).reshape(shape)
         np.copyto(np_output_array[start_index:end_index], computed_array[:,:,:-int(computed_array[0,0,-1]*computed_array[0,0,-2]+2)])
         
