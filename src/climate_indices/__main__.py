@@ -1514,20 +1514,56 @@ def _apply_along_axis_double(params):
     ]
 
 
+    # get the fitting_params if provided
+    if params['args']['fitting_params'] != None and params["index"] == "spei":
+        array_fp = _global_shared_arrays['fitting_params'][_KEY_ARRAY]
+        shape_fp = _global_shared_arrays['fitting_params'][_KEY_SHAPE]
+        np_array_fp = np.frombuffer(array_fp.get_obj()).reshape(shape_fp)
+        sub_array_fp = np_array_fp[start_index:end_index]
+        params_len = sub_array_fp.shape[-1]
+
+        if params["input_type"] == InputType.grid:
+            axis_index = -1
+        elif params["input_type"] == InputType.divisions:
+            axis_index = 1
+        elif params["input_type"] == InputType.timeseries:
+            axis_index = 0
+        
+        if axis_index != 0: # if the array is 2d or 3d shift the params dimension to the front for easier slicing
+            sub_array_fp_2 = np.moveaxis(sub_array_fp, -1, 0)
+        else:
+            sub_array_fp_2 = sub_array_fp
+            
+    
+
     for i, (x, y) in enumerate(zip(sub_array_1, sub_array_2)):
         if params["input_type"] == InputType.grid:
             for j in range(x.shape[0]):
                 if params["index"] == "pet":
                     res = func1d(x[j], y, parameters=params["args"])
-                    computed_array[i, j] = res[:-int(res[-1]*res[-2]+2)]
-                    computed_array_fp[i, j] = res[-int(res[-1]*res[-2]+2):-2]
                     
                 else:
+                    if params['args']['fitting_params'] != None:
+                        if params['args']['distribution'].name == 'gamma':
+                            
+                            params['args']['fitting_params'] = {'alpha': np.moveaxis(sub_array_fp_2[:int(params_len/2),i,j], 0,-1),
+                                                      'beta': np.moveaxis(sub_array_fp_2[int(params_len/2):,i,j], 0,-1)}
+                            
+                        elif params['args']['distribution'].name == 'pearson':
+                            params['args']['fitting_params'] = {'prob_zero': np.moveaxis(sub_array_fp_2[:int(params_len/4),i,j], 0,-1),
+                                                      'skew': np.moveaxis(sub_array_fp_2[int(params_len/4):int(params_len/4)*2,i,j], 0,-1),
+                                                      'loc': np.moveaxis(sub_array_fp_2[int(params_len/4)*2:int(params_len/4)*3,i,j], 0,-1),
+                                                      'scale': np.moveaxis(sub_array_fp_2[int(params_len/4)*3:,i,j], 0,-1)}
+
+
                     res = func1d(x[j], y[j], parameters=params["args"])
                     computed_array[i, j] = res[:-int(res[-1]*res[-2]+2)]
                     computed_array_fp[i, j] = res[-int(res[-1]*res[-2]+2):-2]
 
         elif params["input_type"] == InputType.divisions:
+            if params['args']['fitting_params'] != None: 
+                raise ValueError("TO DO: loading fitting params not yet implemented for divisions") #TODO
+
             res = func1d(x, y, parameters=params["args"])
             computed_array[i] = res[:-int(res[-1]*res[-2]+2)]
             computed_array_fp[i] = res[-int(res[-1]*res[-2]+2):-2]
