@@ -399,8 +399,8 @@ def spei(
 
         # get (optional) fitting parameters if provided
         if fitting_params is not None:
-            alphas = fitting_params["alphas"]
-            betas = fitting_params["betas"]
+            alphas = fitting_params["alpha"]
+            betas = fitting_params["beta"]
         else:
             alphas = None
             betas = None
@@ -422,10 +422,10 @@ def spei(
 
         # get (optional) fitting parameters if provided
         if fitting_params is not None:
-            probabilities_of_zero = fitting_params["probabilities_of_zero"]
-            locs = fitting_params["locs"]
-            scales = fitting_params["scales"]
-            skews = fitting_params["skews"]
+            probabilities_of_zero = fitting_params["prob_zero"]
+            locs = fitting_params["loc"]
+            scales = fitting_params["scale"]
+            skews = fitting_params["skew"]
         else:
             probabilities_of_zero = None
             locs = None
