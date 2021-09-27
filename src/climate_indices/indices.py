@@ -193,7 +193,7 @@ def spi(
         raise ValueError(message)
     
     if fitting_params is not None:
-        if len(fitting_params["alpha"].shape)==3: # if 3D array, extract the indices from the end of the values array
+        if len(fitting_params[[x for x in fitting_params.keys()][0]].shape)==3: # if 3D array, extract the indices from the end of the values array
             index = values[-1].copy()
             values = values[:-1]
             
