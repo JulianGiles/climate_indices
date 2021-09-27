@@ -262,7 +262,7 @@ def spi(
 
         # get (optional) fitting parameters if provided
         if fitting_params is not None:
-            if len(fitting_params["alpha"].shape)==3: 
+            if len(fitting_params["prob_zero"].shape)==3: 
                 index2d = np.argwhere( np.arange(len(fitting_params["prob_zero"][:,:,0].flatten())).reshape(fitting_params["prob_zero"][:,:,0].shape) == index )[0]
     
                 probabilities_of_zero = fitting_params["prob_zero"][index2d[0], index2d[1], :]
