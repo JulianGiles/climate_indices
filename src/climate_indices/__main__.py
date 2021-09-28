@@ -724,7 +724,7 @@ def _compute_write_index(keyword_arguments):
             raise ValueError(f"Invalid 'input_type' keyword argument: {input_type}")
 
     if keyword_arguments["index"] in ['spi', 'spei'] and keyword_arguments["load_params"] != None :
-        files.append(keyword_arguments["load_params"] + "_fitting_params_" + keyword_arguments['distribution'].name + "_"  + keyword_arguments["index"] + ".nc")
+        files.append(keyword_arguments["load_params"] + "_fitting_params_" + keyword_arguments['distribution'].name + "_" + keyword_arguments["index"] + "_" + str(keyword_arguments["scale"]) + ".nc")
 
     dataset = xr.open_mfdataset(files, chunks=chunks)
 
@@ -1152,7 +1152,7 @@ def _compute_write_index(keyword_arguments):
                         
                 # write the fitting_params as NetCDF
                 netcdf_fitting_file_name = \
-    				keyword_arguments["save_params"] + "_fitting_params_" + keyword_arguments['distribution'].name + "_" + keyword_arguments["index"] + "_" + keyword_arguments["scale"] + ".nc"
+    				keyword_arguments["save_params"] + "_fitting_params_" + keyword_arguments['distribution'].name + "_" + keyword_arguments["index"] + "_" + str(keyword_arguments["scale"]) + ".nc"
                 dataset.to_netcdf(netcdf_fitting_file_name) 
 		
                 return netcdf_file_name, output_var_name, netcdf_fitting_file_name, var_name_fp
